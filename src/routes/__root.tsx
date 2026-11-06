@@ -21,6 +21,10 @@ export const Route = createRootRoute({
     links: [
       {
         rel: 'stylesheet',
+        href: '/pico.css',
+      },
+      {
+        rel: 'stylesheet',
         href: appCss,
       },
     ],
@@ -30,7 +34,7 @@ export const Route = createRootRoute({
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="ru">
       <head>
         <HeadContent />
       </head>
