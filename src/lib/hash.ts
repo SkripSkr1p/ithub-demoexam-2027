@@ -1,10 +1,11 @@
-import { createServerOnlyFn } from "@tanstack/react-start";
-import bcrypt from 'bcrypt'
-
-export const hashPassword = createServerOnlyFn((password):Promise<string> => {
-    return bcrypt.hash(password, 10)
-})
-
-export const verifyHash = createServerOnlyFn((password, hash):Promise<boolean> => {
-    return bcrypt.compare(password, hash)
-})
+import { scryptSync, timingSafeEqual, randomBytes } from "node:crypto";
+export function hashPassword(password: string) {
+  const salt = randomBytes(16).toString("hex");
+  return `${salt}:${scryptSync(password, salt, 64).toString("hex")}`;
+}
+export function verifyPassword(password: string, stored: string) {
+  const [salt, hash] = stored.split(":");
+  if (!salt || !hash) return false;
+  const actual = scryptSync(password, salt, 64);
+  return timingSafeEqual(actual, Buffer.from(hash, "hex"));
+}

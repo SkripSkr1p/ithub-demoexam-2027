@@ -1,55 +1,52 @@
-import { type SubmitEvent, useState } from 'react'
-import { createFileRoute, Link } from '@tanstack/react-router'
-
-import { login } from '#/lib/login'
-
-
-export const Route = createFileRoute('/login')({
-  component: RouteComponent,
-})
-
-function RouteComponent() {
-  async function handleSubmit(event: SubmitEvent) {
-    const formData = new FormData(event.target)
-
-    const result = await login({
-      data: {
-        login: formData.get('login')?.toString() as string,
-        password: formData.get('password')?.toString() as string,
-      }
-    })
-
-    if (result.success === false) {
-      setError(result.message)
-      return
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
+import { login } from "#/lib/actions";
+export const Route = createFileRoute("/login")({ component: Login });
+function Login() {
+  const nav = useNavigate();
+  const [loginText, setL] = useState(""),
+    [password, setP] = useState(""),
+    [err, setE] = useState("");
+  async function submit(e: any) {
+    e.preventDefault();
+    try {
+      const r = await login({ data: { login: loginText, password } });
+      nav({ to: r.role === "ADMIN" ? "/admin" : "/entries" });
+    } catch (x: any) {
+      setE(x.message || "Ошибка входа");
     }
-
-    await navigate({ to: '/' })
   }
-
-  const navigate = Route.useNavigate()
-  const [error, setError] = useState<null | string>(null)
-
   return (
-    <div className='page page--auth'>
-
-
-      <article>
-        <h2>Авторизация</h2>
-        <p>{error}</p>
-
-        <form className="form" action="" method="post" onSubmit={handleSubmit}>
-          <input className="input" type="text" name="login" placeholder='Логин' required />
-          <p className="error">Заполните поле</p>
-
-          <input className="input" type="password" name="password" placeholder='Пароль' required />
-          <p className="error">Заполните поле</p>
-
-          <button className="button-submit" type="submit">Отправить</button>
+    <main className="formpage">
+      <div className="formbox">
+        <p className="eyebrow">С ВОЗВРАЩЕНИЕМ</p>
+        <h1>Войти</h1>
+        <p className="muted">Продолжите обучение</p>
+        <form onSubmit={submit}>
+          <label>
+            Логин
+            <input
+              value={loginText}
+              onChange={(e) => setL(e.target.value)}
+              required
+            />
+          </label>
+          <label>
+            Пароль
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setP(e.target.value)}
+              required
+            />
+          </label>
+          {err && <div className="alert">{err}</div>}
+          <button className="btn full">Войти</button>
         </form>
-
-        <Link to="/register">Еще не зарегистрированы? Регистрация</Link>
-      </article>
-    </div>
-  )
+        <p className="bottomlink">
+          Еще не зарегистрированы? <Link to="/register">Регистрация</Link>
+        </p>
+      </div>
+    </main>
+  );
 }

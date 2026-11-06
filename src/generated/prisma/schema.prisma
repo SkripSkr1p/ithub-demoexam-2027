@@ -1,0 +1,45 @@
+generator client {
+  provider = "prisma-client-js" // Исправлено: должно быть prisma-client-js
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  login     String   @unique
+  password  String
+  fullname  String
+  phone     String
+  email     String   @unique
+  role      String   @default("USER")
+  entries   Entry[]
+  reviews   Review[]
+  createdAt DateTime @default(now())
+}
+// Исправлено: перенесено на новую строку для читаемости
+
+model Entry {
+  id        Int      @id @default(autoincrement())
+  course    String
+  startDate DateTime
+  payment   String
+  status    String   @default("Новая")
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  review    Review?
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  text      String
+  rating    Int      @default(5)
+  userId    Int
+  entryId   Int      @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entry     Entry    @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}

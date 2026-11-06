@@ -1,38 +1,44 @@
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js" // Исправлено: должно быть prisma-client-js
   output   = "../src/generated/prisma"
 }
 
-datasource db {
-  provider = "postgresql"
+datasource db { 
+  provider = "postgresql" 
 }
 
 model User {
-  id    Int   @id   @default(autoincrement())
-  login   String    @unique
+  id        Int      @id @default(autoincrement())
+  login     String   @unique
   password  String
-  fullname    String
+  fullname  String
   phone     String
-  email     String
-  entry     Entry[]
-  review    Review[]
-}
+  email     String   @unique
+  role      String   @default("USER")
+  entries   Entry[]
+  reviews   Review[]
+  createdAt DateTime @default(now())
+} // Исправлено: перенесено на новую строку для читаемости
 
 model Entry {
-  id    Int   @id   @default(autoincrement())
-  course  String
-  paymentType   String
-  userId      Int
-  startAt   DateTime
-  createAt    DateTime    @default(now())
-  status    String?    @default("Новая")
-  user      User    @relation(fields: [userId], references: [id])
+  id        Int      @id @default(autoincrement())
+  course    String
+  startDate DateTime
+  payment   String
+  status    String   @default("Новая")
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  review    Review?
 }
 
 model Review {
-  id      Int     @id   @default(autoincrement())
-  userId  Int
-  text    String
-  createdAt   DateTime  @default(now())
-  user   User   @relation(fields: [userId], references: [id])
+  id        Int      @id @default(autoincrement())
+  text      String
+  rating    Int      @default(5)
+  userId    Int
+  entryId   Int      @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entry     Entry    @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
 }
